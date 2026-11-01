@@ -5,6 +5,8 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f1f3f5">
+    <!-- Prerendered pages are visible before the app loads: apply a saved dark theme first. -->
+    <script>try { var t = localStorage.getItem('croco-theme'); if (t === 'system') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark') } catch (e) {}</script>
     <meta name="google-site-verification" content="Dm1I7h7MbUyl6pM-6xq9IWmkWGs-axJ8IQXrkf_HCyQ">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,8 +30,8 @@
     <meta name="twitter:card" content="summary_large_image">
     <!-- Lets Google Dataset Search list the corpus. -->
     <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dataset", "name": "CrocoSign PJM-to-text dataset", "description": "29,928 sentence-level video clips of Polish Sign Language (PJM), about 25 hours from 151 Deaf signers, with corrected Polish transcripts, English translations, signer identifiers and multi-signer and signer-independent splits. Built from the Open Repository of the PJM Corpus of the University of Warsaw.", "url": "https://huggingface.co/datasets/CrocoSign/pjm-data", "sameAs": "https://github.com/crocosign/pjm-data", "license": "https://creativecommons.org/licenses/by-sa/4.0/", "isBasedOn": "https://www.korpuspjm.uw.edu.pl/", "inLanguage": ["pl", "en"], "keywords": ["Polish Sign Language", "PJM", "sign language translation", "sign language dataset"], "creator": {"@type": "Organization", "name": "CrocoSign", "url": "https://crocosign.pl"}}</script>
-    <script type="module" crossorigin src="/assets/index-b_q-K84h.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Vl9gZt1p.css">
+    <script type="module" crossorigin src="/assets/index-BKXcDdAE.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DxRXFw7Z.css">
   </head>
   <body>
     <div id="app"></div>
