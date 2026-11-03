@@ -1,0 +1,531 @@
+# https://crocosign.pl/en/
+
+CrocoSign
+
+We teach AI to translate Polish Sign Language (PJM) videos into text.
+
+This is a research prototype, not a replacement for an interpreter.
+
+This is our engineering thesis at PJATK, “Automatic translation from Polish Sign Language to spoken languages”.
+
+Browse corpus clips
+See model results
+Rate the model's translations
+Play clip
+left hand
+right hand
+body
+face
+
+„Rybka podnosi się i opluwa kota, a ten ucieka.”
+
+Uni-Sign, transfer from OpenASL
+
+The fish rises and spits water at the cat, and the cat runs away.
+
+An example picked from the test set.
+
+The problem
+
+The Polish Association of the Deaf estimates that about 40-50 thousand people in Poland use PJM. It has its own grammar, and meaning is carried by, among other things, the direction and force of a movement and facial expression.
+
+There are few interpreters. 236 sign language interpreters took part in the 2023 census by STPJM and the University of Warsaw. Regional registers hold 508 entries, but they are not kept up to date, so there are probably far fewer active interpreters. An hour of interpreting costs about 132 PLN on average. In an emergency, such as a visit to the doctor, it is often impossible to book one.
+
+At the start we talked the idea and these problems through with Deaf people. What is needed most is more interpreters, and for that, more people and money. Our work runs alongside that: we test whether machine translation from PJM to text is feasible.
+
+We translate straight from video to text. Many systems first write signs down in an intermediate notation called glosses. No manual gloss annotation exists for PJM, so those methods could not be used directly. Pseudo-glosses could be generated automatically, but we chose a fully gloss-free approach: no extra stage and no noise from automatic annotation errors.
+
+We found no existing PJM-to-text translator and no set of recordings ready for training models. We built the dataset ourselves.
+
+How it works
+left hand
+graph encoder
+right hand
+graph encoder
+body
+graph encoder
+face
+graph encoder
+Uni-Sign, transfer from OpenASL
+
+The fish rises and spits water at the cat, and the cat runs away.
+
+Reference (DeepL translation of the transcript)
+
+The fish rises and spits at the cat, and the cat runs away.
+
+A clip from the corpus
+
+One sentence in Polish Sign Language from the University of Warsaw PJM corpus. Transcript (Polish):
+
+„Rybka podnosi się i opluwa kota, a ten ucieka.”
+
+Keypoints
+
+RTMPose marks points on the hands, face and body in every frame. Uni-Sign gets only these points. SpaMo, the other model family we compared, works on the video itself.
+
+Four groups of points
+
+Uni-Sign splits the points into four groups and runs each through its own graph encoder. The encoder looks at how the points sit in a frame and how that layout changes over time. Sides are the signer's, so their left hand appears on the right of the image.
+
+An English sentence
+
+The mT5 language model (580M parameters) turns this into an English sentence. The app then translates it with DeepL into other languages, such as Polish.
+
+Compared with the reference
+
+Words missing from the other sentence are underlined.
+
+The dataset
+
+The recordings come from the Open Repository of the PJM Corpus (Otwarte Repozytorium Korpusu PJM), run by the Sign Language Linguistics Lab at the Faculty of Polish Studies, University of Warsaw. We downloaded and fixed the transcriptions, cut the recordings into one-sentence clips and worked out who signs in each clip. The corpus is licensed under CC BY-SA 4.0, and so is our dataset. The model weights are under CC BY-NC-SA 4.0, because the models we started from are for non-commercial use only. Our code is under the MIT licence.
+
+Open Repository of the PJM Corpus (University of Warsaw)
+
+video-sentence pairs
+29,928
+29,928
+of video, approximately
+25 h
+25 h
+Deaf signers
+151
+151
+
+This dataset exists thanks to the Deaf people who recorded themselves for the corpus and the University of Warsaw team who collected and shared it.
+
+The reference sentences we compare model output with are in English. We translated the Polish transcriptions with DeepL, so they are machine translations, one per clip.
+
+Dataset on Hugging Face: CrocoSign/pjm-data
+
+Dataset preparation code: crocosign/pjm-data (GitHub)
+
+Compared with other datasets
+
+In hours we are mid-pack, but we have 151 signers, second only to OpenASL. With that many people, a model can be tested on signers it never saw in training.
+
+Dataset	Language	Hours	Signers	Source	Domain
+Phoenix-2014T	DGS	11	9
+	television	weather forecast
+CSL-Daily	CSL	23	10
+	studio recordings	daily life
+How2Sign	ASL	80	11
+	studio recordings	general
+OpenASL	ASL	288	220
+	internet	general
+CSL-News	CSL	1,985	no data	television	news
+PJM (ours)	PJM	25	151
+	studio recordings	general
+
+For PJM the table shows the cleaned part we trained on: 29,928 pairs, about 25 h (28 h before cleaning). Figures for the other datasets come from their publications.
+
+Models and results
+
+We compared three models: SpaMo, our modification of SpaMo (“SpaMo (mod.)” in the tables) and Uni-Sign. We trained each one either from scratch or starting from a model already trained on another sign language. We tested them in two ways: in the MS split the test signers also appear in training, in the SI split the model sees them for the first time.
+
+BLEURT of three architectures, from scratch and with transfer
+
+MS
+SI
+
+The test signers also appear in training.
+
+from scratch
+with transfer
+SpaMo
+transfer: PHOENIX
+30.25
+35.12
+SpaMo (mod.)
+transfer: PHOENIX
+30.42
+34.30
+Uni-Sign
+transfer: OpenASL
+30.04
+42.43
+25
+30
+35
+40
+45
+
+Test BLEURT, MS split. The axis starts at 25, not at zero, so the differences are visible. The models started from different sources: both SpaMo variants from German PHOENIX, Uni-Sign from American OpenASL. So the chart compares whole approaches, not architectures alone. The SpaMo SI scores use a slightly different set of test clips, so the SI comparison is approximate.
+
+The best single models came from Uni-Sign fine-tuned on American Sign Language: OpenASL reaches 42.4 BLEURT on MS and 38.2 on SI, How2Sign 42.0 and 37.8. On BLEU-4 the two are almost identical (8.53 and 8.61 on MS); a second training run of each moved BLEU-4 by 0.14 and swapped their order, so we do not name a single winner. Our modification of SpaMo scored close to the original.
+
+Transfer matters most: on MS, without it every model ends up around 2 BLEU-4, and with it the score rises several times over, to 5-8.6 points. For scale, two Deaf signers fluent in ASL and English (not professional interpreters) reach about 19.8 BLEU on How2Sign, and for a third of the clips they could not make out key details without wider context.
+
+The result depends more on the starting point than on the architecture: the best models went through training on American Sign Language before PJM. Part of that gain may come from that stage also teaching the model to write English. On signers the model did not see in training (the SI split), all models do worse: the best, Uni-Sign, gets 6.09 BLEU-4, and both SpaMo variants about 2. This is the weakest point of these models today.
+
+Models on Hugging Face: CrocoSign/pjm-models
+
+Code
+Run the translation yourself
+
+The pjm-models package turns a PJM video file into an English sentence. It downloads the model weights from Hugging Face the first time it runs. The example below uses Uni-Sign; in our test it downloaded about 3.5 GB including dependencies. In our measurements on a 6.6-second recording, Uni-Sign took about 11 s on a CPU and 1.6 s on a graphics card. SpaMo is much heavier: about 110 s on a CPU and 13 s on a card, which needs 24 GB of memory.
+
+git clone https://github.com/crocosign/pjm-models
+cd pjm-models
+uv sync
+uv run python -c "import signsdk; print(signsdk.from_pretrained('unisign-pjm-openasl-ms').predict('clip.mp4').text)"
+
+Put your own PJM recording in place of clip.mp4. You need Python 3.10 or newer and uv.
+
+pjm-models (GitHub)
+Model weights (Hugging Face)
+
+The full app, with the interface and the API, lives in two repositories:
+
+croco-sign-backend (API)
+croco-sign-frontend (interface)
+Frequently asked questions
+How does the CrocoSign sign language translator work?
+
+In the example on this site, the Uni-Sign model gets a video of one sentence in Polish Sign Language (PJM). RTMPose finds the hand, face and body keypoints in every frame, Uni-Sign processes them with graph encoders, and the mT5 language model writes an English sentence from them. To show it in Polish we translate it with DeepL. SpaMo, the other model family we compared, works on the video image itself. Both translate whole sentences; neither recognises single signs.
+
+Does CrocoSign translate sign language live?
+
+No. It is a research prototype, not a replacement for an interpreter. You cannot upload your own video on this site, but you can run the translation yourself with the pjm-models package: Uni-Sign translates a 6.6-second video in about 11 s on a CPU and 1.6 s on a GPU.
+
+Does CrocoSign translate text into Polish Sign Language?
+
+No. We translate in one direction only: from a PJM video to text. Generating sign language from text is a separate problem we did not work on.
+
+How good are the translations?
+
+Far from an interpreter. The best single models, two Uni-Sign variants with transfer from American Sign Language, score about 8.5-8.6 BLEU-4 on signers they saw in training and about 6 on signers they never saw. For scale: two Deaf people fluent in ASL and English (not professional interpreters) reach about 19.8 BLEU on the How2Sign dataset.
+
+Where do the Polish Sign Language videos come from?
+
+From the Open Repository of the PJM Corpus, run by the Sign Language Linguistics Lab at the Faculty of Polish Studies, University of Warsaw. We cut it into 29,928 clips of one sentence each, about 25 hours from 151 Deaf signers, and corrected the transcripts.
+
+Can I download the dataset and the models?
+
+Yes. The dataset is on Hugging Face under CC BY-SA 4.0, and the model weights under CC BY-NC-SA 4.0, so for non-commercial use only. The code is MIT licensed.
+
+Dataset on Hugging Face: CrocoSign/pjm-data
+Models on Hugging Face: CrocoSign/pjm-models
+Will CrocoSign replace interpreters for Deaf people?
+
+No, and that is not the aim. The Deaf people we talked to said what is needed most is more PJM interpreters, and with them people and money. Our work checks whether machine translation from PJM to text is feasible at all.
+
+How can I help?
+
+Rate translations in our survey: you watch a short PJM video and a text, then rate whether they match. Every rating helps, most of all from people who know Polish Sign Language.
+
+Rate the model's translations
+Who we are
+
+We are Wojciech Sieńko and Rostyslav Kovalenko. CrocoSign is our engineering thesis at PJATK (Computer Science, specialisation in Artificial Intelligence), written under the supervision of Albert Śledzianowski, PhD, MBA.
+
+At our poster at the GHOST Day conference, 8-9 May 2026.
+
+# https://crocosign.pl/en/metrics/
+
+Model statistics
+TEST SPLIT
+MS (multi-signer) - test set includes signers also seen in training (known to the model).
+SI (signer-independent) - test set contains only signers unseen in training (generalization test).
+Uni-Sign (ensemble)
+Transfer source	Split	BLEU-1	BLEU-2	BLEU-3	BLEU-4	ROUGE-L	BLEURT	chrF	BERTScore
+OpenASL + How2Sign (6 models)	MS	34.62	20.69	14.17	10.36	24.43	44.37	27.89	89.24
+OpenASL + How2Sign (2 models)	SI	30.00	15.65	9.85	6.68	18.65	39.19	23.41	88.35
+What the ensembles are made of
+
+MS: six Uni-Sign models chosen one by one on the validation set. They are the OpenASL and How2Sign transfer models, each with two random seeds, a model trained on OpenASL, then How2Sign, then PJM, and a model trained on a mix of the references and translations by other models that had not seen those clips.
+
+SI: two Uni-Sign models, with OpenASL and How2Sign transfer.
+
+An ensemble averages the models' predictions at every next word, so it is not a single-model result, and it costs as much computation as it has models.
+
+Uni-Sign
+Transfer source	Split	BLEU-1	BLEU-2	BLEU-3	BLEU-4	ROUGE-L	BLEURT	chrF	BERTScore
+OpenASL	MS	32.61	18.41	12.10	8.53	21.72	42.43	26.04	88.91
+How2Sign	MS	32.42	18.33	12.11	8.61	21.90	41.98	25.86	88.86
+CSL-News	MS	26.42	12.69	7.70	5.16	16.35	36.36	20.56	87.79
+none (from scratch)	MS	18.58	5.77	2.96	1.82	8.48	30.04	13.36	86.14
+OpenASL	SI	29.28	14.93	9.18	6.09	17.62	38.16	22.82	88.18
+How2Sign	SI	28.78	14.43	8.86	5.91	17.37	37.83	22.36	88.14
+CSL-News	SI	21.98	7.89	4.00	2.41	11.36	31.31	16.80	87.01
+none (from scratch)	SI	15.29	3.48	1.52	0.85	6.11	30.08	13.07	85.95
+SpaMo
+Transfer source	Split	BLEU-1	BLEU-2	BLEU-3	BLEU-4	ROUGE-L	BLEURT	chrF	BERTScore
+PHOENIX	MS	28.87	13.76	8.27	5.54	19.66	35.12	21.06	87.79
+none (PJM only)	MS	18.55	6.60	3.40	2.03	12.37	30.25	15.32	86.13
+PHOENIX	SI	21.97	7.46	3.63	2.09	12.42	28.84	16.02	86.63
+none (PJM only)	SI	17.65	4.53	1.86	0.93	9.28	27.97	13.14	85.75
+SpaMo (mod.)
+Transfer source	Split	BLEU-1	BLEU-2	BLEU-3	BLEU-4	ROUGE-L	BLEURT	chrF	BERTScore
+PHOENIX	MS	27.90	13.14	7.76	5.06	18.86	34.30	20.94	87.68
+none (PJM only)	MS	18.45	6.04	2.85	1.56	11.92	30.42	14.50	86.02
+PHOENIX	SI	21.97	7.39	3.59	2.06	12.26	27.86	16.17	86.53
+none (PJM only)	SI	18.78	5.23	2.27	1.17	10.12	27.67	14.14	86.03
+
+Bold marks the best value in each column within its split, MS or SI.
+
+# https://crocosign.pl/
+
+CrocoSign
+
+Uczymy sztuczną inteligencję tłumaczyć nagrania w polskim języku migowym (PJM) na tekst.
+
+To prototyp badawczy, nie zamiennik tłumacza.
+
+To nasza praca inżynierska w PJATK, „Automatyczne tłumaczenie z Polskiego Języka Migowego na języki foniczne”.
+
+Przeglądaj nagrania z korpusu
+Zobacz wyniki modeli
+Oceń tłumaczenia modelu
+Odtwórz klip
+lewa dłoń
+prawa dłoń
+tułów
+twarz
+
+„Rybka podnosi się i opluwa kota, a ten ucieka.”
+
+Uni-Sign, transfer z OpenASL
+
+The fish rises and spits water at the cat, and the cat runs away.
+
+Przykład wybrany ze zbioru testowego.
+
+Problem
+
+Według szacunków Polskiego Związku Głuchych PJM posługuje się w Polsce około 40-50 tysięcy osób. Ma własną gramatykę, a znaczenie niosą w nim między innymi kierunek i siła ruchu oraz mimika.
+
+Tłumaczy jest mało. W spisie STPJM i UW z 2023 roku wzięło udział 236 tłumaczy języka migowego. Wojewódzkie rejestry mają 508 wpisów, ale nie są aktualizowane, więc czynnych tłumaczy jest zapewne wyraźnie mniej. Godzina tłumaczenia kosztuje średnio około 132 zł. W nagłej sytuacji, na przykład u lekarza, tłumacza często nie da się zamówić.
+
+Na początku pracy rozmawialiśmy o pomyśle i o tych problemach z Głuchymi. Najbardziej potrzeba więcej tłumaczy, a do tego ludzi i pieniędzy. Nasza praca idzie obok tego: sprawdzamy, czy maszynowe tłumaczenie z PJM na tekst jest wykonalne.
+
+Tłumaczymy wprost z wideo na tekst. Wiele systemów najpierw zapisuje znaki w notacji pośredniej, tak zwanych glosach. Dla PJM nie ma ręcznych adnotacji glosowych, więc takich metod nie dało się użyć bezpośrednio. Można by wygenerować pseudoglosy automatycznie, ale wybraliśmy podejście całkiem bez glos: bez dodatkowego etapu i bez szumu z błędów automatycznej adnotacji.
+
+Nie znaleźliśmy gotowego tłumacza z PJM na tekst ani zbioru nagrań przygotowanego do uczenia modeli. Zbiór zrobiliśmy sami.
+
+Jak to działa
+lewa dłoń
+enkoder grafowy
+prawa dłoń
+enkoder grafowy
+tułów
+enkoder grafowy
+twarz
+enkoder grafowy
+Uni-Sign, transfer z OpenASL
+
+The fish rises and spits water at the cat, and the cat runs away.
+
+Referencja (tłumaczenie DeepL transkrypcji)
+
+The fish rises and spits at the cat, and the cat runs away.
+
+Klip z korpusu
+
+Jedno zdanie w polskim języku migowym z korpusu PJM Uniwersytetu Warszawskiego. Transkrypcja:
+
+„Rybka podnosi się i opluwa kota, a ten ucieka.”
+
+Punkty kluczowe
+
+RTMPose wyznacza w każdej klatce punkty dłoni, twarzy i tułowia. Uni-Sign dostaje tylko te punkty. SpaMo, druga z porównywanych rodzin modeli, pracuje na samym obrazie.
+
+Cztery grupy punktów
+
+Uni-Sign dzieli punkty na cztery grupy i każdą przetwarza osobnym enkoderem grafowym. Enkoder patrzy, jak punkty układają się w klatce i jak ten układ zmienia się w czasie. Strony są liczone od osoby migającej, więc jej lewa dłoń jest na obrazie po prawej.
+
+Zdanie po angielsku
+
+Model językowy mT5 (580 mln parametrów) składa z tego zdanie po angielsku. Aplikacja przekłada je potem DeepL-em na inne języki, na przykład na polski.
+
+Porównanie z referencją
+
+Podkreśliliśmy słowa, których brakuje w drugim zdaniu.
+
+Zbiór danych
+
+Nagrania pochodzą z Otwartego Repozytorium Korpusu PJM, które prowadzi Sign Language Linguistics Lab na Wydziale Polonistyki UW. Transkrypcje pobraliśmy i poprawiliśmy, nagrania pocięliśmy na klipy po jednym zdaniu, a dla każdego klipu ustaliliśmy, kto miga. Korpus jest udostępniony na licencji CC BY-SA 4.0 i na tej samej licencji udostępniamy nasz zbiór danych. Wagi modeli są na licencji CC BY-NC-SA 4.0, bo modele, od których zaczynaliśmy, można używać tylko niekomercyjnie. Kod udostępniamy na licencji MIT.
+
+Otwarte Repozytorium Korpusu PJM (Uniwersytet Warszawski)
+
+pary wideo-zdanie
+29 928
+29 928
+nagrań, w przybliżeniu
+25 h
+25 h
+osób Głuchych
+151
+151
+
+Ten zbiór istnieje dzięki osobom Głuchym, które nagrały się do korpusu, i zespołowi UW, który go zebrał i udostępnił.
+
+Zdania referencyjne, z którymi porównujemy wynik modelu, są po angielsku. Przetłumaczyliśmy polskie transkrypcje DeepL-em, więc to tłumaczenia maszynowe, po jednym na klip.
+
+Zbiór danych na Hugging Face: CrocoSign/pjm-data
+
+Kod przygotowania zbioru: crocosign/pjm-data (GitHub)
+
+Na tle innych zbiorów
+
+Pod względem godzin jesteśmy w średniej. Za to osób migających mamy 151, więcej ma tylko OpenASL. Przy tylu osobach model da się testować na migających, których nie widział w treningu.
+
+Zbiór	Język	Godziny	Osoby	Źródło	Tematyka
+Phoenix-2014T	DGS	11	9
+	telewizja	prognoza pogody
+CSL-Daily	CSL	23	10
+	nagrania studyjne	życie codzienne
+How2Sign	ASL	80	11
+	nagrania studyjne	ogólna
+OpenASL	ASL	288	220
+	internet	ogólna
+CSL-News	CSL	1985	brak danych	telewizja	wiadomości
+PJM (nasz)	PJM	25	151
+	nagrania studyjne	ogólna
+
+Dla PJM tabela podaje oczyszczoną część, na której trenowaliśmy: 29 928 par, około 25 h (28 h przed czyszczeniem). Dane pozostałych zbiorów pochodzą z ich publikacji.
+
+Modele i wyniki
+
+Porównaliśmy trzy modele: SpaMo, naszą modyfikację SpaMo (w tabelach „SpaMo (modyf.)”) i Uni-Sign. Każdy uczyliśmy albo od zera, albo zaczynając od modelu wytrenowanego wcześniej na innym języku migowym. Testowaliśmy je na dwa sposoby: w podziale MS osoby z testu były też w treningu, w podziale SI model widzi je pierwszy raz.
+
+BLEURT trzech architektur, od zera i z transferem
+
+MS
+SI
+
+Osoby z testu były też w treningu.
+
+od zera
+z transferem
+SpaMo
+transfer: PHOENIX
+30,25
+35,12
+SpaMo (modyf.)
+transfer: PHOENIX
+30,42
+34,30
+Uni-Sign
+transfer: OpenASL
+30,04
+42,43
+25
+30
+35
+40
+45
+
+BLEURT na zbiorze testowym, podział MS. Oś zaczyna się od 25, nie od zera, żeby różnice były widoczne. Modele startowały z różnych źródeł: oba SpaMo z niemieckiego PHOENIX, Uni-Sign z amerykańskiego OpenASL. Wykres porównuje więc całe podejścia, nie same architektury. Wyniki SpaMo w SI liczyliśmy na nieco innym zestawie klipów testowych, więc porównanie w SI jest przybliżone.
+
+Najlepsze pojedyncze modele to Uni-Sign dostrojony na amerykańskim języku migowym: OpenASL ma 42,4 punktu BLEURT w MS i 38,2 w SI, How2Sign 42,0 i 37,8. W BLEU-4 oba są prawie równe (8,53 i 8,61 w MS); powtórny trening każdego z nich zmienił BLEU-4 o 0,14 i odwrócił ich kolejność, więc nie wskazujemy jednego zwycięzcy. Nasza modyfikacja SpaMo dała wynik zbliżony do bazowego.
+
+Najwięcej daje transfer: w MS bez niego wszystkie modele kończą w okolicach 2 BLEU-4, a z nim wynik rośnie kilkukrotnie, do 5-8,6 punktu. Dla skali: dwie głuche osoby biegle posługujące się ASL i angielskim (nie zawodowi tłumacze) osiągają około 19,8 BLEU na zbiorze How2Sign, a w jednej trzeciej klipów nie rozumiały kluczowych szczegółów bez szerszego kontekstu.
+
+Wynik zależy bardziej od punktu startu niż od architektury: najlepiej wypadają modele, które przed PJM przeszły trening na amerykańskim języku migowym. Część tego zysku może wynikać z tego, że ten etap uczy też pisać po angielsku. Na osobach, których model nie widział w treningu (podział SI), wszystkie modele wypadają gorzej: najlepszy Uni-Sign ma 6,09 BLEU-4, a oba warianty SpaMo około 2. To dziś najsłabszy punkt tych modeli.
+
+Modele na Hugging Face: CrocoSign/pjm-models
+
+Kod
+Uruchom tłumaczenie u siebie
+
+Pakiet pjm-models zamienia plik wideo w PJM na zdanie po angielsku. Wagi modelu pobiera z Hugging Face przy pierwszym uruchomieniu. Przykład niżej korzysta z Uni-Sign i w naszym teście pobrał razem z zależnościami około 3,5 GB. W naszych pomiarach na 6,6-sekundowym nagraniu Uni-Sign potrzebował około 11 s na procesorze i 1,6 s na karcie graficznej. SpaMo jest dużo cięższy: około 110 s na procesorze i 13 s na karcie, która musi mieć 24 GB pamięci.
+
+git clone https://github.com/crocosign/pjm-models
+cd pjm-models
+uv sync
+uv run python -c "import signsdk; print(signsdk.from_pretrained('unisign-pjm-openasl-ms').predict('clip.mp4').text)"
+
+W miejsce clip.mp4 wstaw własne nagranie w PJM. Potrzebujesz Pythona 3.10 lub nowszego i narzędzia uv.
+
+pjm-models (GitHub)
+Wagi modeli (Hugging Face)
+
+Cała aplikacja, z interfejsem i API, jest w dwóch repozytoriach:
+
+croco-sign-backend (API)
+croco-sign-frontend (interfejs)
+Najczęstsze pytania
+Jak działa tłumacz języka migowego CrocoSign?
+
+W przykładzie na tej stronie model Uni-Sign dostaje nagranie jednego zdania w polskim języku migowym (PJM). RTMPose wyznacza w każdej klatce punkty dłoni, twarzy i tułowia, Uni-Sign przetwarza je enkoderami grafowymi, a model językowy mT5 składa z tego zdanie po angielsku. Na polski przekładamy je DeepL-em. SpaMo, druga porównywana rodzina modeli, pracuje na samym obrazie. Oba tłumaczą całe zdania, nie rozpoznają pojedynczych znaków.
+
+Czy CrocoSign tłumaczy język migowy na żywo?
+
+Nie. To prototyp badawczy, nie zamiennik tłumacza. Na tej stronie nie wgrasz własnego nagrania, ale możesz uruchomić tłumaczenie u siebie pakietem pjm-models: Uni-Sign tłumaczy 6,6-sekundowe nagranie w około 11 s na procesorze i 1,6 s na karcie graficznej.
+
+Czy CrocoSign tłumaczy tekst na polski język migowy?
+
+Nie. Tłumaczymy tylko w jedną stronę: z nagrania w PJM na tekst. Generowanie języka migowego z tekstu to osobny problem, którym się nie zajmowaliśmy.
+
+Jak dobre są te tłumaczenia?
+
+Daleko im do tłumacza. Najlepsze pojedyncze modele, dwa warianty Uni-Sign z transferem z amerykańskiego języka migowego, mają około 8,5-8,6 punktu BLEU-4 na osobach znanych im z treningu i około 6 na osobach, których nie widziały. Dla skali: dwie głuche osoby biegle znające ASL i angielski (nie zawodowi tłumacze) osiągają około 19,8 BLEU na zbiorze How2Sign.
+
+Skąd pochodzą nagrania w polskim języku migowym?
+
+Z Otwartego Repozytorium Korpusu PJM, które prowadzi Sign Language Linguistics Lab na Wydziale Polonistyki Uniwersytetu Warszawskiego. Pocięliśmy je na 29 928 klipów po jednym zdaniu, razem około 25 godzin nagrań 151 osób Głuchych, i poprawiliśmy transkrypcje.
+
+Czy mogę pobrać zbiór danych i modele?
+
+Tak. Zbiór danych jest na Hugging Face na licencji CC BY-SA 4.0, a wagi modeli na licencji CC BY-NC-SA 4.0, czyli tylko do użytku niekomercyjnego. Kod udostępniamy na licencji MIT.
+
+Zbiór danych na Hugging Face: CrocoSign/pjm-data
+Modele na Hugging Face: CrocoSign/pjm-models
+Czy CrocoSign zastąpi tłumacza PJM dla osób Głuchych?
+
+Nie i nie taki jest cel. Głusi, z którymi rozmawialiśmy, mówili, że najbardziej potrzeba więcej tłumaczy PJM, a do tego ludzi i pieniędzy. Nasza praca sprawdza, czy maszynowe tłumaczenie z PJM na tekst jest w ogóle wykonalne.
+
+Jak mogę pomóc?
+
+Oceń tłumaczenia w naszej ankiecie: oglądasz krótkie nagranie w PJM i tekst, a potem oceniasz, czy się zgadzają. Przyda się każda ocena, a najbardziej osób, które znają polski język migowy.
+
+Oceń tłumaczenia modelu
+Kim jesteśmy
+
+Jesteśmy Wojciech Sieńko i Rostyslav Kovalenko. CrocoSign to nasza praca inżynierska w PJATK (kierunek Informatyka, specjalność Sztuczna Inteligencja), napisana pod opieką dr. Alberta Śledzianowskiego, MBA.
+
+Przy naszym posterze na konferencji GHOST Day, 8-9 maja 2026.
+
+# https://crocosign.pl/metrics/
+
+Statystyki modeli
+PODZIAŁ TESTOWY
+MS (multi-signer) - w teście osoby obecne też w treningu (znane modelowi).
+SI (signer-independent) - w teście wyłącznie osoby niewidziane w treningu (test generalizacji).
+Uni-Sign (zespół modeli)
+Źródło transferu	Podział	BLEU-1	BLEU-2	BLEU-3	BLEU-4	ROUGE-L	BLEURT	chrF	BERTScore
+OpenASL + How2Sign (6 modeli)	MS	34,62	20,69	14,17	10,36	24,43	44,37	27,89	89,24
+OpenASL + How2Sign (2 modele)	SI	30,00	15,65	9,85	6,68	18,65	39,19	23,41	88,35
+Skład zespołu
+
+MS: sześć modeli Uni-Sign wybranych po kolei na zbiorze walidacyjnym. To modele z transferem z OpenASL i z How2Sign, każdy w dwóch wersjach z różnym ziarnem losowania, model uczony kolejno na OpenASL, How2Sign i PJM oraz model uczony na mieszance referencji i tłumaczeń innych modeli, które tych klipów nie widziały.
+
+SI: dwa modele Uni-Sign, z transferem z OpenASL i z How2Sign.
+
+Zespół uśrednia przewidywania modeli przy każdym kolejnym słowie, więc nie jest wynikiem pojedynczego modelu i kosztuje tyle obliczeń, ile modeli zawiera.
+
+Uni-Sign
+Źródło transferu	Podział	BLEU-1	BLEU-2	BLEU-3	BLEU-4	ROUGE-L	BLEURT	chrF	BERTScore
+OpenASL	MS	32,61	18,41	12,10	8,53	21,72	42,43	26,04	88,91
+How2Sign	MS	32,42	18,33	12,11	8,61	21,90	41,98	25,86	88,86
+CSL-News	MS	26,42	12,69	7,70	5,16	16,35	36,36	20,56	87,79
+brak (od zera)	MS	18,58	5,77	2,96	1,82	8,48	30,04	13,36	86,14
+OpenASL	SI	29,28	14,93	9,18	6,09	17,62	38,16	22,82	88,18
+How2Sign	SI	28,78	14,43	8,86	5,91	17,37	37,83	22,36	88,14
+CSL-News	SI	21,98	7,89	4,00	2,41	11,36	31,31	16,80	87,01
+brak (od zera)	SI	15,29	3,48	1,52	0,85	6,11	30,08	13,07	85,95
+SpaMo
+Źródło transferu	Podział	BLEU-1	BLEU-2	BLEU-3	BLEU-4	ROUGE-L	BLEURT	chrF	BERTScore
+PHOENIX	MS	28,87	13,76	8,27	5,54	19,66	35,12	21,06	87,79
+brak (tylko PJM)	MS	18,55	6,60	3,40	2,03	12,37	30,25	15,32	86,13
+PHOENIX	SI	21,97	7,46	3,63	2,09	12,42	28,84	16,02	86,63
+brak (tylko PJM)	SI	17,65	4,53	1,86	0,93	9,28	27,97	13,14	85,75
+SpaMo (modyf.)
+Źródło transferu	Podział	BLEU-1	BLEU-2	BLEU-3	BLEU-4	ROUGE-L	BLEURT	chrF	BERTScore
+PHOENIX	MS	27,90	13,14	7,76	5,06	18,86	34,30	20,94	87,68
+brak (tylko PJM)	MS	18,45	6,04	2,85	1,56	11,92	30,42	14,50	86,02
+PHOENIX	SI	21,97	7,39	3,59	2,06	12,26	27,86	16,17	86,53
+brak (tylko PJM)	SI	18,78	5,23	2,27	1,17	10,12	27,67	14,14	86,03
+
+Pogrubiona jest najlepsza wartość w kolumnie w obrębie podziału, MS albo SI.

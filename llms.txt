@@ -1,0 +1,36 @@
+# CrocoSign
+
+> CrocoSign is a research prototype of an AI translator from Polish Sign Language (PJM, polski język migowy) to text, with an open dataset of 29,928 PJM video-sentence pairs (about 25 hours, 151 Deaf signers) and trained models. It translates recorded videos of whole sentences, one direction only (PJM to text); it is not a live translator and not a replacement for an interpreter.
+
+CrocoSign is the engineering thesis of Wojciech Sieńko and Rostyslav Kovalenko at PJATK (Polish-Japanese Academy of Information Technology, Gdańsk), supervised by Albert Śledzianowski. The site is in Polish and English. Polish name of the topic: "tłumacz języka migowego" (sign language translator).
+
+Key facts:
+
+- Data: the Open Repository of the PJM Corpus, Sign Language Linguistics Lab, Faculty of Polish Studies, University of Warsaw. We corrected the transcripts, cut the recordings into one-sentence clips and identified the signer in each clip. Each clip in the dataset has a corrected Polish transcript and a machine (DeepL) English translation; the English references used for scoring are these DeepL translations.
+- Splits: MS (test signers also appear in training) and SI (test signers never seen in training).
+- Models compared: Uni-Sign (pose keypoints from RTMPose, graph encoders, mT5 decoder), SpaMo and our modified SpaMo (both work on the video image), each trained from scratch or with transfer from another sign language (PHOENIX, How2Sign, OpenASL).
+- Results: the best single models, two Uni-Sign variants with transfer from American Sign Language, score about 8.5-8.6 BLEU-4 on seen signers and about 6 on unseen signers. For scale, two Deaf people fluent in ASL and English (not professional interpreters) reach about 19.8 BLEU on How2Sign.
+- Licences: dataset CC BY-SA 4.0 (as the corpus), model weights CC BY-NC-SA 4.0 (non-commercial), code MIT.
+- Context: the Polish Association of the Deaf estimates 40-50 thousand PJM users in Poland; Deaf people we consulted said more human interpreters are what is needed most. CrocoSign tests whether machine translation from PJM to text is feasible at all.
+
+## Pages
+
+- [Home](https://crocosign.pl/en/): what CrocoSign is, the dataset, models, results and FAQ ([Polish](https://crocosign.pl/))
+- [Model results](https://crocosign.pl/en/metrics/): BLEU, ROUGE-L, BLEURT for every model and split ([Polish](https://crocosign.pl/metrics/))
+- [Videos](https://crocosign.pl/en/videos/): browse every sentence clip with its transcript and signer ([Polish](https://crocosign.pl/videos/))
+- [Survey](https://crocosign.pl/en/survey/): rate whether a translation matches a PJM video; no sign-in ([Polish](https://crocosign.pl/survey/))
+
+## Data and models
+
+- [PJM dataset on Hugging Face](https://huggingface.co/datasets/CrocoSign/pjm-data): 29,928 video-sentence pairs with splits and signer ids
+- [Model weights on Hugging Face](https://huggingface.co/CrocoSign/pjm-models)
+- [pjm-models](https://github.com/crocosign/pjm-models): Python package to run the translation locally
+- [pjm-data](https://github.com/crocosign/pjm-data): code that builds the dataset from the corpus
+- [Uni-Sign-PJM](https://github.com/crocosign/Uni-Sign-PJM) and [SpaMo-PJM](https://github.com/crocosign/SpaMo-PJM): model training code
+- [Full text of the home and results pages](https://crocosign.pl/llms-full.txt), English then Polish, generated from the site
+
+## Optional
+
+- [Backend code](https://github.com/crocosign/croco-sign-backend)
+- [Frontend code](https://github.com/crocosign/croco-sign-frontend)
+- [Open Repository of the PJM Corpus (University of Warsaw)](https://www.korpuspjm.uw.edu.pl/)
