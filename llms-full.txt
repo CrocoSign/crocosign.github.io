@@ -219,6 +219,8 @@ Who we are
 
 We are Wojciech Sieńko and Rostyslav Kovalenko. CrocoSign is our engineering thesis at PJATK (Computer Science, specialisation in Artificial Intelligence), written under the supervision of Albert Śledzianowski, PhD, MBA.
 
+The C in our logo is a crocodile's open jaw. That is also how PJM signs “crocodile”: two hands opening and closing like jaws.
+
 At our poster at the GHOST Day conference, 8-9 May 2026.
 
 # https://crocosign.pl/en/metrics/
@@ -484,6 +486,8 @@ Oceń tłumaczenia modelu
 Kim jesteśmy
 
 Jesteśmy Wojciech Sieńko i Rostyslav Kovalenko. CrocoSign to nasza praca inżynierska w PJATK (kierunek Informatyka, specjalność Sztuczna Inteligencja), napisana pod opieką dr. Alberta Śledzianowskiego, MBA.
+
+C w naszym logo to otwarta paszcza krokodyla. Tak samo miga się „krokodyl” w PJM: dwie dłonie otwierają się i zamykają jak szczęki.
 
 Przy naszym posterze na konferencji GHOST Day, 8-9 maja 2026.
 
