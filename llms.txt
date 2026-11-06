@@ -1,6 +1,6 @@
 # CrocoSign
 
-> CrocoSign is a research prototype of an AI translator from Polish Sign Language (PJM, polski język migowy) to text, with an open dataset of 29,928 PJM video-sentence pairs (about 25 hours, 151 Deaf signers) and trained models. It translates recorded videos of whole sentences, one direction only (PJM to text); it is not a live translator and not a replacement for an interpreter.
+> CrocoSign is an AI model that translates Polish Sign Language (PJM, polski język migowy) videos into English sentences, shown in Polish through DeepL, with an open dataset of 29,928 PJM video-sentence pairs (about 25 hours, 151 Deaf signers) and trained models. It translates recorded videos of whole sentences, in one direction (PJM to text). The site does not run translation itself, because running a GPU server costs more than the project can afford; the models run locally with the pjm-models package.
 
 CrocoSign is the engineering thesis of Wojciech Sieńko and Rostyslav Kovalenko at PJATK (Polish-Japanese Academy of Information Technology, Gdańsk), supervised by Albert Śledzianowski. The site is in Polish and English. Polish name of the topic: "tłumacz języka migowego" (sign language translator).
 

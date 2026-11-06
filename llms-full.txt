@@ -4,8 +4,6 @@ CrocoSign
 
 We teach AI to translate Polish Sign Language (PJM) videos into text.
 
-This is a research prototype, not a replacement for an interpreter.
-
 This is our engineering thesis at PJATK, “Automatic translation from Polish Sign Language to spoken languages”.
 
 Browse corpus clips
@@ -19,11 +17,11 @@ face
 
 „Rybka podnosi się i opluwa kota, a ten ucieka.”
 
-Uni-Sign, transfer from OpenASL
+Model output (Uni-Sign)
 
 The fish rises and spits water at the cat, and the cat runs away.
 
-An example picked from the test set.
+An example picked from the test set. On average the model still translates far worse than a person; see the results.
 
 The problem
 
@@ -39,18 +37,18 @@ We found no existing PJM-to-text translator and no set of recordings ready for t
 
 How it works
 left hand
-graph encoder
+motion analysis
 right hand
-graph encoder
+motion analysis
 body
-graph encoder
+motion analysis
 face
-graph encoder
-Uni-Sign, transfer from OpenASL
+motion analysis
+Model output (Uni-Sign)
 
 The fish rises and spits water at the cat, and the cat runs away.
 
-Reference (DeepL translation of the transcript)
+Reference sentence (the transcript translated by DeepL)
 
 The fish rises and spits at the cat, and the cat runs away.
 
@@ -60,17 +58,17 @@ One sentence in Polish Sign Language from the University of Warsaw PJM corpus. T
 
 „Rybka podnosi się i opluwa kota, a ten ucieka.”
 
-Keypoints
+Hands, face and body
 
-RTMPose marks points on the hands, face and body in every frame. Uni-Sign gets only these points. SpaMo, the other model family we compared, works on the video itself.
+In every frame a program marks points on the hands and fingers, the face and the body. The model looks only at these points, not at the whole video.
 
 Four groups of points
 
-Uni-Sign splits the points into four groups and runs each through its own graph encoder. The encoder looks at how the points sit in a frame and how that layout changes over time. Sides are the signer's, so their left hand appears on the right of the image.
+The model looks at each hand, the face and the body separately: how the points sit in a frame and how they move over time. Sides are the signer's, so their left hand appears on the right of the image.
 
 An English sentence
 
-The mT5 language model (580M parameters) turns this into an English sentence. The app then translates it with DeepL into other languages, such as Polish.
+Finally a language model turns this into a whole English sentence. We translate it into Polish automatically (DeepL).
 
 Compared with the reference
 
@@ -182,11 +180,11 @@ croco-sign-frontend (interface)
 Frequently asked questions
 How does the CrocoSign sign language translator work?
 
-In the example on this site, the Uni-Sign model gets a video of one sentence in Polish Sign Language (PJM). RTMPose finds the hand, face and body keypoints in every frame, Uni-Sign processes them with graph encoders, and the mT5 language model writes an English sentence from them. To show it in Polish we translate it with DeepL. SpaMo, the other model family we compared, works on the video image itself. Both translate whole sentences; neither recognises single signs.
+The model in the example on this site watches a video of one sentence in Polish Sign Language (PJM). A program marks points on the hands, face and body in every frame, the model follows how they move, and from that writes a whole English sentence. We translate it into Polish automatically. It translates whole sentences, not single signs. We compared several models; their results are under Model statistics.
 
 Does CrocoSign translate sign language live?
 
-No. It is a research prototype, not a replacement for an interpreter. You cannot upload your own video on this site, but you can run the translation yourself with the pjm-models package: Uni-Sign translates a 6.6-second video in about 11 s on a CPU and 1.6 s on a GPU.
+Not on this site. Translating fast enough for visitors needs a server with a graphics card, and keeping one running costs more than we can spend on it. You can run the model yourself with the pjm-models package: it translates a 6.6-second video in about 11 s on an ordinary CPU and 1.6 s on a graphics card.
 
 Does CrocoSign translate text into Polish Sign Language?
 
@@ -272,8 +270,6 @@ CrocoSign
 
 Uczymy sztuczną inteligencję tłumaczyć nagrania w polskim języku migowym (PJM) na tekst.
 
-To prototyp badawczy, nie zamiennik tłumacza.
-
 To nasza praca inżynierska w PJATK, „Automatyczne tłumaczenie z Polskiego Języka Migowego na języki foniczne”.
 
 Przeglądaj nagrania z korpusu
@@ -287,11 +283,11 @@ twarz
 
 „Rybka podnosi się i opluwa kota, a ten ucieka.”
 
-Uni-Sign, transfer z OpenASL
+Wynik modelu (Uni-Sign)
 
 The fish rises and spits water at the cat, and the cat runs away.
 
-Przykład wybrany ze zbioru testowego.
+Przykład wybrany ze zbioru testowego. Przeciętnie model tłumaczy jeszcze dużo gorzej niż człowiek, zobacz wyniki.
 
 Problem
 
@@ -307,18 +303,18 @@ Nie znaleźliśmy gotowego tłumacza z PJM na tekst ani zbioru nagrań przygotow
 
 Jak to działa
 lewa dłoń
-enkoder grafowy
+analiza ruchu
 prawa dłoń
-enkoder grafowy
+analiza ruchu
 tułów
-enkoder grafowy
+analiza ruchu
 twarz
-enkoder grafowy
-Uni-Sign, transfer z OpenASL
+analiza ruchu
+Wynik modelu (Uni-Sign)
 
 The fish rises and spits water at the cat, and the cat runs away.
 
-Referencja (tłumaczenie DeepL transkrypcji)
+Zdanie wzorcowe (transkrypcja przetłumaczona przez DeepL)
 
 The fish rises and spits at the cat, and the cat runs away.
 
@@ -328,17 +324,17 @@ Jedno zdanie w polskim języku migowym z korpusu PJM Uniwersytetu Warszawskiego.
 
 „Rybka podnosi się i opluwa kota, a ten ucieka.”
 
-Punkty kluczowe
+Dłonie, twarz i ciało
 
-RTMPose wyznacza w każdej klatce punkty dłoni, twarzy i tułowia. Uni-Sign dostaje tylko te punkty. SpaMo, druga z porównywanych rodzin modeli, pracuje na samym obrazie.
+W każdej klatce program zaznacza punkty na dłoniach i palcach, twarzy i tułowiu. Model patrzy tylko na te punkty, nie na całe nagranie.
 
 Cztery grupy punktów
 
-Uni-Sign dzieli punkty na cztery grupy i każdą przetwarza osobnym enkoderem grafowym. Enkoder patrzy, jak punkty układają się w klatce i jak ten układ zmienia się w czasie. Strony są liczone od osoby migającej, więc jej lewa dłoń jest na obrazie po prawej.
+Każdą dłoń, twarz i tułów model analizuje osobno: sprawdza, jak punkty układają się w klatce i jak zmieniają się w czasie. Strony są liczone od osoby migającej, więc jej lewa dłoń jest na obrazie po prawej.
 
 Zdanie po angielsku
 
-Model językowy mT5 (580 mln parametrów) składa z tego zdanie po angielsku. Aplikacja przekłada je potem DeepL-em na inne języki, na przykład na polski.
+Na koniec model językowy układa z tego całe zdanie po angielsku. Na polski przekładamy je automatycznie (DeepL).
 
 Porównanie z referencją
 
@@ -450,11 +446,11 @@ croco-sign-frontend (interfejs)
 Najczęstsze pytania
 Jak działa tłumacz języka migowego CrocoSign?
 
-W przykładzie na tej stronie model Uni-Sign dostaje nagranie jednego zdania w polskim języku migowym (PJM). RTMPose wyznacza w każdej klatce punkty dłoni, twarzy i tułowia, Uni-Sign przetwarza je enkoderami grafowymi, a model językowy mT5 składa z tego zdanie po angielsku. Na polski przekładamy je DeepL-em. SpaMo, druga porównywana rodzina modeli, pracuje na samym obrazie. Oba tłumaczą całe zdania, nie rozpoznają pojedynczych znaków.
+Model z przykładu na tej stronie ogląda nagranie jednego zdania w polskim języku migowym (PJM). Program zaznacza w każdej klatce punkty na dłoniach, twarzy i tułowiu, model śledzi, jak się poruszają, i na tej podstawie pisze całe zdanie po angielsku. Na polski przekładamy je automatycznie. Tłumaczy całe zdania, nie pojedyncze znaki. Porównaliśmy kilka modeli, a ich wyniki są w zakładce Statystyki modeli.
 
 Czy CrocoSign tłumaczy język migowy na żywo?
 
-Nie. To prototyp badawczy, nie zamiennik tłumacza. Na tej stronie nie wgrasz własnego nagrania, ale możesz uruchomić tłumaczenie u siebie pakietem pjm-models: Uni-Sign tłumaczy 6,6-sekundowe nagranie w około 11 s na procesorze i 1,6 s na karcie graficznej.
+Nie na tej stronie. Żeby tłumaczenie działało dość szybko dla odwiedzających, potrzebny jest serwer z kartą graficzną, a jego stałe utrzymanie kosztuje więcej, niż możemy na to wydać. Model możesz uruchomić u siebie pakietem pjm-models: 6,6-sekundowe nagranie tłumaczy w około 11 s na zwykłym procesorze i 1,6 s na karcie graficznej.
 
 Czy CrocoSign tłumaczy tekst na polski język migowy?
 
